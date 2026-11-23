@@ -39,7 +39,7 @@ Electron 45 + CodeMirror 6，界面中英双语（设置▸首选项▸语言，
 
 | 平台 | 文件 | 说明 |
 |---|---|---|
-| Windows | `墨码-Setup-<版本>.exe` | NSIS 向导式安装，可自选目录 |
+| Windows | `moma-Setup-<version>.exe` | NSIS 向导式安装，可自选目录 |
 | Linux (amd64) | `moma_<版本>_amd64.deb` | `sudo dpkg -i moma_...deb`，装到 /opt/moma |
 
 各文件的 SHA256 见 Release 说明。**未签名**：Windows SmartScreen 可能拦截（「更多信息」→「仍要运行」）。
