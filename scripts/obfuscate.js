@@ -43,9 +43,12 @@ fs.rmSync('dist-app', { recursive: true, force: true });
 fs.mkdirSync('dist-app/renderer', { recursive: true });
 fs.copyFileSync('renderer/index.html', 'dist-app/renderer/index.html');
 fs.copyFileSync('renderer/style.css', 'dist-app/renderer/style.css');
+fs.mkdirSync('dist-app/locales', { recursive: true });
+fs.copyFileSync('locales/zh-CN.js', 'dist-app/locales/zh-CN.js');
+fs.copyFileSync('locales/en-US.js', 'dist-app/locales/en-US.js');
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 fs.writeFileSync('dist-app/package.json',
-  JSON.stringify({ name: 'npj', productName: 'npj', version: pkg.version, main: 'main.js' }, null, 2));
+  JSON.stringify({ name: pkg.name, productName: pkg.productName, version: pkg.version, main: 'main.js' }, null, 2));
 
 for (const [src, dst] of files) {
   const code = fs.readFileSync(src, 'utf8');

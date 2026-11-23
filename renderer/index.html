@@ -33,11 +33,11 @@
       <div class="fw-tab" data-tab="replace">替换</div>
     </div>
     <div class="fw-body">
-      <div class="fw-row"><label>查找内容:</label><input id="fw-find" type="text"></div>
-      <div class="fw-row fw-rep-row" style="display:none"><label>替换为:</label><input id="fw-replace" type="text"></div>
-      <div class="fw-row"><label>选项:</label>
-        <label class="fw-opt"><input type="checkbox" id="fw-case"> 匹配大小写</label>
-        <label class="fw-opt"><input type="checkbox" id="fw-word"> 全字匹配</label>
+      <div class="fw-row"><label id="fw-what-label">查找内容:</label><input id="fw-find" type="text"></div>
+      <div class="fw-row fw-rep-row" style="display:none"><label id="fw-repl-label">替换为:</label><input id="fw-replace" type="text"></div>
+      <div class="fw-row"><label id="fw-opts-label">选项:</label>
+        <label class="fw-opt"><input type="checkbox" id="fw-case"> <span id="fw-case-text">匹配大小写</span></label>
+        <label class="fw-opt"><input type="checkbox" id="fw-word"> <span id="fw-word-text">全字匹配</span></label>
       </div>
       <div class="fw-btns">
         <div class="fw-col">
@@ -57,11 +57,21 @@
       <div class="prefs-title">首选项</div>
       <fieldset>
         <legend>自动补全</legend>
-        <label><input type="checkbox" id="pref-ac-enable"> 启用自动补全</label>
-        <label><input type="checkbox" id="pref-ac-alltabs"> 匹配所有已打开文件的单词（默认仅当前文件）</label>
+        <label><input type="checkbox" id="pref-ac-enable"> <span id="pref-ac-enable-text">启用自动补全</span></label>
+        <label><input type="checkbox" id="pref-ac-alltabs"> <span id="pref-ac-alltabs-text">匹配所有已打开文件的单词（默认仅当前文件）</span></label>
         <div class="pref-row">
-          <label for="pref-ac-minlen">触发所需最少字符数</label>
+          <label for="pref-ac-minlen" id="pref-ac-minlen-label">触发所需最少字符数</label>
           <input type="number" id="pref-ac-minlen" min="1" max="10" value="1">
+        </div>
+      </fieldset>
+      <fieldset id="pref-lang-fieldset">
+        <legend id="pref-lang-legend">语言</legend>
+        <div class="pref-row">
+          <label for="pref-lang-select" id="pref-lang-label">语言</label>
+          <select id="pref-lang-select">
+            <option value="zh-CN">中文（简体）</option>
+            <option value="en-US">English</option>
+          </select>
         </div>
       </fieldset>
       <div class="prefs-buttons">

@@ -1,5 +1,7 @@
-// 墨码 v0.2 渲染进程 — 经典编辑器的工具栏/标签栏/状态栏行为
+// 墨码 渲染进程 — 经典编辑器的工具栏/标签栏/状态栏行为
 // 文件操作全部走 preload 暴露的 window.npp（Electron IPC），原生菜单动作经 onAction 分发。
+
+import { t, setLang, getLang } from "./i18n.js";
 
 import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter,
          drawSelection, dropCursor, rectangularSelection, crosshairCursor, highlightSpecialChars,
@@ -11,7 +13,7 @@ import { indentOnInput, indentUnit, bracketMatching, foldGutter, foldKeymap,
 import { closeBrackets, closeBracketsKeymap, autocompletion } from "@codemirror/autocomplete";
 import { search, setSearchQuery, SearchQuery, findNext, findPrevious, replaceNext, replaceAll,
          highlightSelectionMatches } from "@codemirror/search";
-import { tags as t } from "@lezer/highlight";
+import { tags as lezerTags } from "@lezer/highlight";
 
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
@@ -47,14 +49,14 @@ const langIdOf = (tab) => tab.langOverride || (tab.path ? (EXT_LANG[tab.path.spl
 
 // ---------- 经典语法配色 ----------
 const nppHighlight = HighlightStyle.define([
-  { tag: t.keyword, color: "#0000FF" },
-  { tag: [t.comment, t.lineComment, t.blockComment], color: "#008000" },
-  { tag: [t.string, t.special(t.string)], color: "#808000" },
-  { tag: t.number, color: "#FF8000" },
-  { tag: [t.tagName], color: "#0000FF" },
-  { tag: [t.attributeName], color: "#800080" },
-  { tag: t.heading, color: "#0000FF", fontWeight: "bold" },
-  { tag: t.link, color: "#0000FF", textDecoration: "underline" },
+  { tag: lezerTags.keyword, color: "#0000FF" },
+  { tag: [lezerTags.comment, lezerTags.lineComment, lezerTags.blockComment], color: "#008000" },
+  { tag: [lezerTags.string, lezerTags.special(lezerTags.string)], color: "#808000" },
+  { tag: lezerTags.number, color: "#FF8000" },
+  { tag: [lezerTags.tagName], color: "#0000FF" },
+  { tag: [lezerTags.attributeName], color: "#800080" },
+  { tag: lezerTags.heading, color: "#0000FF", fontWeight: "bold" },
+  { tag: lezerTags.link, color: "#0000FF", textDecoration: "underline" },
 ]);
 
 // ---------- 工具栏图标（手绘 SVG） ----------
@@ -85,29 +87,29 @@ const floppySVG = (color, dark) => S(
 
 // ---------- 工具栏 ----------
 const TOOLBAR = [
-  { id: "new", tip: "新建", act: { type: "new" } },
-  { id: "open", tip: "打开", act: { type: "open" } },
+  { id: "new", tip: () => t("toolbar.new"), act: { type: "new" } },
+  { id: "open", tip: () => t("toolbar.open"), act: { type: "open" } },
   { sep: true },
-  { id: "save", tip: "保存", act: { type: "save" } },
-  { id: "saveAll", tip: "保存全部", act: { type: "saveAll" } },
-  { id: "close", tip: "关闭", act: { type: "close" } },
-  { id: "closeAll", tip: "关闭全部", act: { type: "closeAll" } },
+  { id: "save", tip: () => t("toolbar.save"), act: { type: "save" } },
+  { id: "saveAll", tip: () => t("toolbar.saveAll"), act: { type: "saveAll" } },
+  { id: "close", tip: () => t("toolbar.close"), act: { type: "close" } },
+  { id: "closeAll", tip: () => t("toolbar.closeAll"), act: { type: "closeAll" } },
   { sep: true },
-  { id: "print", tip: "打印（未实现）", disabled: true },
+  { id: "print", tip: () => t("toolbar.print"), disabled: true },
   { sep: true },
-  { id: "cut", tip: "剪切", run: () => document.execCommand("cut") },
-  { id: "copy", tip: "复制", run: () => document.execCommand("copy") },
-  { id: "paste", tip: "粘贴", run: () => document.execCommand("paste") },
+  { id: "cut", tip: () => t("toolbar.cut"), run: () => document.execCommand("cut") },
+  { id: "copy", tip: () => t("toolbar.copy"), run: () => document.execCommand("copy") },
+  { id: "paste", tip: () => t("toolbar.paste"), run: () => document.execCommand("paste") },
   { sep: true },
-  { id: "undo", tip: "撤销", run: () => undo(view) },
-  { id: "redo", tip: "重做", run: () => redo(view) },
+  { id: "undo", tip: () => t("toolbar.undo"), run: () => undo(view) },
+  { id: "redo", tip: () => t("toolbar.redo"), run: () => redo(view) },
   { sep: true },
-  { id: "find", tip: "查找", run: () => showFindWin("find") },
+  { id: "find", tip: () => t("toolbar.find"), run: () => showFindWin("find") },
   { sep: true },
-  { id: "zoomIn", tip: "放大", run: () => zoomFont(1) },
-  { id: "zoomOut", tip: "缩小", run: () => zoomFont(-1) },
+  { id: "zoomIn", tip: () => t("toolbar.zoomIn"), run: () => zoomFont(1) },
+  { id: "zoomOut", tip: () => t("toolbar.zoomOut"), run: () => zoomFont(-1) },
   { sep: true },
-  { id: "wrap", tip: "自动换行", run: () => toggleWrap() },
+  { id: "wrap", tip: () => t("toolbar.wrap"), run: () => toggleWrap() },
 ];
 
 const toolbarEl = document.getElementById("toolbar");
@@ -122,7 +124,7 @@ function renderToolbar() {
     }
     const btn = document.createElement("div");
     btn.className = "tb-btn" + (item.disabled ? " disabled" : "");
-    btn.title = item.tip;
+    btn.title = typeof item.tip === "function" ? item.tip() : item.tip;
     btn.innerHTML = ICONS[item.id];
     btn.addEventListener("click", () => {
       if (item.act) handleAction(item.act);
@@ -365,7 +367,7 @@ function renderTabs() {
     const iconColor = tab.dirty ? ["#c23b3b", "#8c1f1f"] : ["#366bca", "#1f4a92"];
     div.innerHTML = `<span class="doc-icon">${floppySVG(iconColor[0], iconColor[1])}</span>` +
       `<span class="name"></span><span class="close">×</span>`;
-    div.querySelector(".name").textContent = tab.name;
+    div.querySelector(".name").textContent = tab.isNew ? renameTabForLang(tab) : tab.name;
     div.title = tab.path || tab.name;
     tabbarEl.appendChild(div);
   });
@@ -387,7 +389,7 @@ function activateTab(idx) {
   ];
   if (!findWin.hidden) effects.push(setSearchQuery.of(makeQuery()));
   view.dispatch({ effects });
-  window.npp.setTitle(`${tab.name} - 墨码`);
+  window.npp.setTitle(`${tab.name} - ${t("title.suffix")}`);
   reportMenuState();
   renderTabs();
   updateStatus();
@@ -416,10 +418,16 @@ function reallyClose(idx) {
 }
 
 // ---------- 新建 / 打开 / 保存 ----------
+// 未命名标签：按当前语言渲染（英文 new → Untitled.txt，中文保持 new）
+function renameTabForLang(tab) {
+  if (!tab.isNew) return tab.name;
+  return t("tab.defaultName", { n: tab.newNum || 0 });
+}
 function newTab() {
   newCounter += 1;
   const tab = {
-    name: `new ${newCounter}`, path: null, encoding: "UTF-8",
+    name: t("tab.defaultName", { n: newCounter }), newNum: newCounter,
+    path: null, encoding: "UTF-8",
     eol: window.npp.platform === "win32" ? "crlf" : "lf",
     isNew: true, langOverride: null, doc: "", savedContent: "", dirty: false,
   };
@@ -475,10 +483,10 @@ async function saveTab(tab) {
     tab.isNew = false;
   }
   const r = await window.npp.writeFile(path, toEol(tab.doc, tab.eol), tab.encoding);
-  if (r.error) { alert("保存失败：" + r.error); return false; }
+  if (r.error) { alert(t("alert.saveFailed", { err: r.error })); return false; }
   tab.savedContent = tab.doc;
   tab.dirty = false;
-  window.npp.setTitle(`${tab.name} - 墨码`);
+  window.npp.setTitle(`${tab.name} - ${t("title.suffix")}`);
   renderTabs();
   updateStatus();
   return true;
@@ -584,7 +592,7 @@ function toggleLineNumbers() {
 
 // ---------- 缩放（只改文字大小，对齐 Notepad++：全局、工具栏/状态栏不动） ----------
 function saveConfig() {
-  window.npp.setConfig({ fontSize, wrap: wrapOn, lineNumbers: lineNumsOn, ac: acCfg });
+  window.npp.setConfig({ fontSize, wrap: wrapOn, lineNumbers: lineNumsOn, ac: acCfg, language: getLang() });
 }
 function setFont(px) {
   fontSize = Math.max(6, Math.min(48, px));
@@ -666,7 +674,7 @@ document.getElementById("fw-replace-btn").addEventListener("click", () => { appl
 document.getElementById("fw-replace-all").addEventListener("click", () => {
   applyQuery();
   const n = replaceAll(view);
-  flashStatus(`已替换 ${n} 处`);
+  flashStatus(t("find.replaced", { n }));
   view.focus();
 });
 for (const id of ["fw-close", "fw-close2"]) {
@@ -799,27 +807,38 @@ function byteLength(text, encoding) {
   return n;
 }
 
+// 状态栏瞬时提示：改状态栏文本 1.6 秒后恢复（随 updateStatus 的正常刷新自然覆盖）
+let flashTimer = null;
+function flashStatus(text) {
+  if (!sb.type) return;
+  if (flashTimer) { clearTimeout(flashTimer); flashTimer = null; }
+  sb.type.textContent = text;
+  flashTimer = setTimeout(() => { flashTimer = null; updateStatus(); }, 1600);
+}
+
 function updateStatus() {
   const tab = tabs[activeIdx];
   if (!tab) return;
-  sb.type.textContent = `文件类型 : ${LANG_TYPE_LABEL[langIdOf(tab)] || "normal text file"}`;
-  sb.len.textContent = `长度 : ${byteLength(tab.doc, tab.encoding)}`;
-  sb.lines.textContent = `行数 : ${view.state.doc.lines}`;
+  sb.type.textContent = t("status.type", { value: LANG_TYPE_LABEL[langIdOf(tab)] || "normal text file" });
+  sb.len.textContent = t("status.len", { n: byteLength(tab.doc, tab.encoding) });
+  sb.lines.textContent = t("status.lines", { n: view.state.doc.lines });
   const head = view.state.selection.main.head;
   const range = view.state.selection.main;
   const line = view.state.doc.lineAt(head);
   const sel = Math.abs(range.to - range.from);
-  sb.pos.textContent = `Ln : ${line.number} Col : ${head - line.from + 1} Sel : ${sel}`;
-  sb.eol.textContent = tab.eol === "crlf" ? "Windows (CR LF)" : "Unix (LF)";
+  sb.pos.textContent = t("status.pos", { line: line.number, col: head - line.from + 1, sel });
+  sb.eol.textContent = tab.eol === "crlf" ? t("status.eol.crlf") : t("status.eol.lf");
   sb.enc.textContent = tab.encoding;
 }
 
 // ---------- 首选项 ----------
 const prefsOverlay = document.getElementById("prefs-overlay");
+const prefLangSelect = document.getElementById("pref-lang-select");
 function showPrefs() {
   document.getElementById("pref-ac-enable").checked = acCfg.enabled;
   document.getElementById("pref-ac-alltabs").checked = acCfg.allTabs;
   document.getElementById("pref-ac-minlen").value = acCfg.minLen;
+  prefLangSelect.value = getLang();
   prefsOverlay.hidden = false;
 }
 document.getElementById("prefs-cancel").addEventListener("click", () => { prefsOverlay.hidden = true; });
@@ -830,7 +849,15 @@ document.getElementById("prefs-ok").addEventListener("click", () => {
   view.dispatch({ effects: acComp.reconfigure(acExtension()) });
   prefsOverlay.hidden = true;
   saveConfig();
+  // 语言改动即生效：IPC 通知主进程存盘 + 重建原生菜单；主进程广播 lang:changed 后本进程重绘
+  const lang = prefLangSelect.value;
+  if (lang && lang !== getLang()) window.npp.setLang(lang).catch(() => {});
 });
+// 语言下拉的选项文字用各自语言显示（中文选项在中文环境、English 选项在英文环境），始终固定
+(function initLangOptions() {
+  prefLangSelect.options[0].text = t("prefs.language.zhCN");
+  prefLangSelect.options[1].text = t("prefs.language.enUS");
+})();
 function updateCursor(state) {
   const head = state.selection.main.head;
   const line = state.doc.lineAt(head);
@@ -878,21 +905,21 @@ function showEditorMenu(e) {
   const sel = v.state.selection.main;
   const hasSel = sel.from !== sel.to;
   window.npp.showContextMenu(e.clientX, e.clientY, [
-    { id: "cut", label: "剪切(T)", enabled: hasSel },
-    { id: "copy", label: "复制(C)", enabled: hasSel },
-    { id: "paste", label: "粘贴(P)", enabled: true },
-    { id: "delete", label: "删除(D)", enabled: hasSel },
+    { id: "cut", label: t("ctx.edit.cut"), enabled: hasSel },
+    { id: "copy", label: t("ctx.edit.copy"), enabled: hasSel },
+    { id: "paste", label: t("ctx.edit.paste"), enabled: true },
+    { id: "delete", label: t("ctx.edit.delete"), enabled: hasSel },
     { type: "separator" },
-    { id: "selectAll", label: "全选(A)" },
+    { id: "selectAll", label: t("ctx.edit.selectAll") },
   ]);
 }
 function showTabMenu(e, idx) {
   e.preventDefault();
-  const t = tabs[idx];
+  const tab = tabs[idx];
   window.npp.showContextMenu(e.clientX, e.clientY, [
-    { id: "saveTab", label: "保存(S)", enabled: t && t.dirty },
-    { id: "closeTab", label: "关闭(C)" },
-    { id: "closeOtherTabs", label: "关闭其他标签", enabled: tabs.length > 1 },
+    { id: "saveTab", label: t("ctx.tab.save"), enabled: tab && tab.dirty },
+    { id: "closeTab", label: t("ctx.tab.close") },
+    { id: "closeOtherTabs", label: t("ctx.tab.closeOthers"), enabled: tabs.length > 1 },
   ]);
 }
 // 捕获阶段监听：CodeMirror 的 contenteditable 会吞掉冒泡阶段的事件（Linux 上尤其明显）
@@ -904,22 +931,69 @@ tabbarEl.addEventListener("contextmenu", (e) => {
 
 
 
-renderToolbar();
-// 启动时恢复上次的缩放/换行/行号/自动补全（存于 userData/moma-config.json）
-(async function restoreConfig() {
-  const cfg = await window.npp.getConfig().catch(() => ({}));
-  if (cfg) {
-    if (typeof cfg.fontSize === "number") fontSize = Math.max(6, Math.min(48, cfg.fontSize));
-    if (typeof cfg.wrap === "boolean") wrapOn = cfg.wrap;
-    if (typeof cfg.lineNumbers === "boolean") lineNumsOn = cfg.lineNumbers;
-    if (cfg.ac) acCfg = Object.assign(acCfg, cfg.ac);
+// ---------- 静态文本随语言重绘（只改文字，不动未保存内容/撤销栈） ----------
+function applyI18n() {
+  document.documentElement.lang = getLang();
+  document.title = t("title.suffix");
+  const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  set("term-title-text", t("term.title"));
+  set("sb-term", t("status.term"));
+  const sbTerm = document.getElementById("sb-term");
+  if (sbTerm) sbTerm.title = t("status.term.title");
+  set("findwin-title", t("find.title"));
+  set("fw-what-label", t("find.what"));
+  set("fw-repl-label", t("find.replaceWith"));
+  set("fw-opts-label", t("find.options"));
+  set("fw-case-text", t("find.case"));
+  set("fw-word-text", t("find.word"));
+  set("fw-next", t("find.next"));
+  set("fw-prev", t("find.prev"));
+  set("fw-replace-btn", t("find.replace"));
+  set("fw-replace-all", t("find.replaceAll"));
+  set("fw-close2", t("find.close"));
+  document.querySelectorAll(".fw-tab").forEach((el) => {
+    if (el.dataset.tab === "find") el.textContent = t("find.tab.find");
+    else if (el.dataset.tab === "replace") el.textContent = t("find.tab.replace");
+  });
+  const prefsTitle = document.querySelector("#prefs-dialog .prefs-title");
+  if (prefsTitle) prefsTitle.textContent = t("prefs.title");
+  set("pref-ac-enable-text", t("prefs.ac.enable"));
+  set("pref-ac-alltabs-text", t("prefs.ac.alltabs"));
+  set("pref-ac-minlen-label", t("prefs.ac.minLen"));
+  set("pref-lang-label", t("prefs.language"));
+  set("pref-lang-legend", t("prefs.language"));
+  set("prefs-cancel", t("prefs.cancel"));
+  set("prefs-ok", t("prefs.ok"));
+  // 语言下拉的选项文字固定用各自语言
+  if (prefLangSelect) {
+    prefLangSelect.options[0].text = t("prefs.language.zhCN");
+    prefLangSelect.options[1].text = t("prefs.language.enUS");
   }
+  renderToolbar();
+  renderTabs();
+  updateStatus();
+}
+
+renderToolbar();
+// 启动：先取持久化的界面语言（冷启动即正确），再恢复配置、应用全部文本、建首个标签
+window.npp.onLangChanged((lang) => { setLang(lang); applyI18n(); });
+(async function restoreConfig() {
+  try {
+    const cfg = await window.npp.getConfig().catch(() => ({}));
+    if (cfg && typeof cfg.language === "string") setLang(cfg.language);
+  } catch { /* 语言读不到时保持默认 zh-CN */ }
+  const cfg = (await window.npp.getConfig().catch(() => ({}))) || {};
+  if (typeof cfg.fontSize === "number") fontSize = Math.max(6, Math.min(48, cfg.fontSize));
+  if (typeof cfg.wrap === "boolean") wrapOn = cfg.wrap;
+  if (typeof cfg.lineNumbers === "boolean") lineNumsOn = cfg.lineNumbers;
+  if (cfg.ac) acCfg = Object.assign(acCfg, cfg.ac);
   view.dispatch({ effects: [
     fontComp.reconfigure(fontTheme(fontSize)),
     wrapComp.reconfigure(wrapOn ? EditorView.lineWrapping : []),
     lineNumComp.reconfigure(lineNumsOn ? lineNumbers() : []),
     acComp.reconfigure(acExtension()),
   ]});
+  applyI18n();
   reportMenuState();
   newTab();
 })();

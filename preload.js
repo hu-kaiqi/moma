@@ -13,6 +13,10 @@ contextBridge.exposeInMainWorld('npp', {
   platform: process.platform,
   getConfig: () => ipcRenderer.invoke('config:get'),
   setConfig: (cfg) => ipcRenderer.invoke('config:set', cfg),
+  // 界面语言：启动时读当前语言；切换走 setLang（主进程存盘+重建菜单后广播 lang:changed）
+  getLang: () => ipcRenderer.invoke('lang:get'),
+  setLang: (lang) => ipcRenderer.invoke('lang:set', lang),
+  onLangChanged: (cb) => ipcRenderer.on('lang:changed', (e, lang) => cb(lang)),
   termRun: (cmd, cwd) => ipcRenderer.invoke('term:run', { cmd, cwd }),
   onAction: (cb) => ipcRenderer.on('action', (e, a) => cb(a)),
   // 原生右键菜单

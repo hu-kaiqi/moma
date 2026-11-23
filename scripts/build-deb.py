@@ -8,6 +8,9 @@ import os
 import sys
 import tarfile
 
+PKG = 'moma'
+ICON_PNG = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'icon.png')
+
 
 def build_data_tar(release_dir, version):
     src = os.path.join(release_dir, 'linux-unpacked')
@@ -43,6 +46,14 @@ def build_data_tar(release_dir, version):
         info.size = len(data)
         info.mode = 0o644
         tar.addfile(info, io.BytesIO(data))
+        # hicolor 图标（256x256 icon.png 在仓；缺了不致命）
+        if os.path.isfile(ICON_PNG):
+            with open(ICON_PNG, 'rb') as f:
+                pdata = f.read()
+            pinfo = tarfile.TarInfo('usr/share/icons/hicolor/256x256/apps/moma.png')
+            pinfo.size = len(pdata)
+            pinfo.mode = 0o644
+            tar.addfile(pinfo, io.BytesIO(pdata))
     return out
 
 
@@ -54,8 +65,9 @@ def build_control_tar(release_dir, version):
         'Priority: optional\n'
         'Architecture: amd64\n'
         'Depends: libgtk-3-0, libnotify4, libnss3, libxss1, libxtst6, xdg-utils, libatspi2.0-0, libsecret-1-0, libgbm1, libasound2t64 | libasound2\n'
-        'Maintainer: 墨码 <moma@local>\n'
-        'Description: 墨码 - 代码编辑器 / Markdown 文本编辑器\n'
+        'Maintainer: hu-kaiqi <hu-kaiqi@users.noreply.github.com>\n'
+        'Description: 墨码 (moma) - Notepad++ style code editor\n'
+        ' Code editor / Markdown text editor, UI in Chinese and English.\n'
     )
     out = os.path.join(release_dir, 'control.tar.gz')
     postinst = '#!/bin/sh\nchmod 4755 /opt/moma/chrome-sandbox 2>/dev/null || true\nexit 0\n'
