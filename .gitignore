@@ -1,0 +1,13 @@
+node_modules/
+release/
+dist-app/
+renderer/bundle.js
+# 引导程序编译产物（源码 launcher.cpp / launcher-linux.cpp / icon.rc 在仓）
+*.exe
+*.res
+*.log
+# 未混淆源码的历史快照（开源后版本走 git 提交链）
+backup/
+__pycache__/
+*.pyc
+.DS_Store

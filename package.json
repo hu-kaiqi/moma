@@ -1,0 +1,83 @@
+{
+  "name": "moma",
+  "productName": "墨码",
+  "version": "0.4.3",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "build-renderer": "esbuild renderer/src/renderer.js --bundle --format=iife --outfile=renderer/bundle.js",
+    "obfuscate": "node scripts/obfuscate.js",
+    "dist": "npm run build-renderer && npm run obfuscate && electron-builder --win nsis",
+    "dist:linux": "npm run build-renderer && npm run obfuscate && electron-builder --linux deb",
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^45.3.3",
+    "electron-builder": "^26.0.0",
+    "esbuild": "^0.25.0",
+    "javascript-obfuscator": "^4.1.0",
+    "@codemirror/autocomplete": "^6.18.6",
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/lang-cpp": "^6.0.3",
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.9",
+    "@codemirror/lang-java": "^6.0.2",
+    "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/lang-markdown": "^6.3.3",
+    "@codemirror/lang-python": "^6.2.0",
+    "@codemirror/lang-sql": "^6.2.1",
+    "@codemirror/lang-xml": "^6.1.0",
+    "@codemirror/language": "^6.11.0",
+    "@codemirror/search": "^6.5.11",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.38.1",
+    "@lezer/highlight": "^1.2.5",
+    "codemirror": "^6.0.2"
+  },
+  "build": {
+    "appId": "cn.moma.editor",
+    "productName": "墨码",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist-app/**"
+    ],
+    "extraMetadata": {
+      "main": "dist-app/main.js"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "墨码-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "artifactName": "墨码-Setup-${version}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "deb"
+      ],
+      "category": "Utility",
+      "artifactName": "墨码_${version}_amd64.${ext}"
+    },
+    "icon": "icon.ico"
+  },
+  "allowScripts": {
+    "electron@45.3.3": true
+  },
+  "author": {
+    "name": "hu-kaiqi"
+  },
+  "license": "AGPL-3.0-or-later",
+  "homepage": "https://github.com/hu-kaiqi/moma",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hu-kaiqi/moma.git"
+  }
+}

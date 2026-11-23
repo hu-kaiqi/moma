@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>墨码</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="toolbar"></div>
+  <div id="tabbar"></div>
+  <div id="editor-host"></div>
+  <div id="term-dock" hidden>
+    <div id="term-bar"><span id="term-title-text">终端</span><span id="term-close">×</span></div>
+    <div id="term-scroll">
+      <div id="term-out"></div>
+      <div id="term-line"><span id="term-prompt"></span><input id="term-input" type="text" spellcheck="false" autocomplete="off"></div>
+    </div>
+  </div>
+  <div id="statusbar">
+    <span class="sb-panel" id="sb-type">文件类型 : normal text file</span>
+    <span class="sb-panel" id="sb-len">长度 : 0</span>
+    <span class="sb-panel" id="sb-lines">行数 : 1</span>
+    <span class="sb-panel" id="sb-pos">Ln : 1 Col : 1 Sel : 0</span>
+    <span class="sb-panel" id="sb-eol">Windows (CR LF)</span>
+    <span class="sb-panel" id="sb-enc">UTF-8</span>
+    <span class="sb-panel sb-btn" id="sb-term" title="底部终端">终端</span>
+    <span class="sb-panel sb-right" id="sb-ins">INS</span>
+  </div>
+  <div id="findwin" hidden>
+    <div id="findwin-title">查找<span class="fw-close" id="fw-close">×</span></div>
+    <div class="fw-tabs">
+      <div class="fw-tab active" data-tab="find">查找</div>
+      <div class="fw-tab" data-tab="replace">替换</div>
+    </div>
+    <div class="fw-body">
+      <div class="fw-row"><label>查找内容:</label><input id="fw-find" type="text"></div>
+      <div class="fw-row fw-rep-row" style="display:none"><label>替换为:</label><input id="fw-replace" type="text"></div>
+      <div class="fw-row"><label>选项:</label>
+        <label class="fw-opt"><input type="checkbox" id="fw-case"> 匹配大小写</label>
+        <label class="fw-opt"><input type="checkbox" id="fw-word"> 全字匹配</label>
+      </div>
+      <div class="fw-btns">
+        <div class="fw-col">
+          <button id="fw-next">查找下一个</button>
+          <button id="fw-replace-btn" class="fw-rep" style="display:none">替换</button>
+          <button id="fw-replace-all" class="fw-rep" style="display:none">全部替换</button>
+        </div>
+        <div class="fw-col">
+          <button id="fw-prev">查找上一个</button>
+          <button id="fw-close2">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="prefs-overlay" hidden>
+    <div id="prefs-dialog">
+      <div class="prefs-title">首选项</div>
+      <fieldset>
+        <legend>自动补全</legend>
+        <label><input type="checkbox" id="pref-ac-enable"> 启用自动补全</label>
+        <label><input type="checkbox" id="pref-ac-alltabs"> 匹配所有已打开文件的单词（默认仅当前文件）</label>
+        <div class="pref-row">
+          <label for="pref-ac-minlen">触发所需最少字符数</label>
+          <input type="number" id="pref-ac-minlen" min="1" max="10" value="1">
+        </div>
+      </fieldset>
+      <div class="prefs-buttons">
+        <button id="prefs-cancel">取消</button>
+        <button id="prefs-ok">确定</button>
+      </div>
+    </div>
+  </div>
+  <script src="bundle.js"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+/* npj v0.2 — 复刻 Notepad++ 默认经典浅色界面 */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  display: flex;
+  flex-direction: column;
+  background: #F0F0F0;
+  font-family: "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  color: #000;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ---------- 工具栏 ---------- */
+#toolbar {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 4px;
+  background: #F0F0F0;
+  border-bottom: 1px solid #D6D6D6;
+  flex: none;
+}
+.tb-btn {
+  width: 26px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.tb-btn:hover { background: #D9E7F5; border-color: #B3CEE8; }
+.tb-btn.disabled { opacity: 0.35; pointer-events: none; }
+.tb-sep {
+  width: 1px;
+  height: 18px;
+  background: #C8C8C8;
+  margin: 0 4px;
+}
+.tb-btn svg { width: 16px; height: 16px; display: block; }
+
+/* ---------- 标签栏（Notepad++ 风格） ---------- */
+#tabbar {
+  display: flex;
+  align-items: flex-end;
+  height: 25px;
+  background: #F0F0F0;
+  border-bottom: 1px solid #C8C8C8;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: none;
+}
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 8px;
+  background: #E8E8E8;
+  border: 1px solid #C8C8C8;
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  margin-right: 1px;
+  cursor: pointer;
+  color: #555;
+  white-space: nowrap;
+  position: relative;
+  top: 1px;
+}
+.tab.active {
+  background: #FFFFFF;
+  color: #000;
+  font-weight: bold;
+  height: 25px;
+}
+.tab .doc-icon { width: 12px; height: 12px; flex: none; }
+.tab .close {
+  width: 14px;
+  height: 14px;
+  line-height: 12px;
+  text-align: center;
+  border-radius: 2px;
+  color: #888;
+  visibility: hidden;
+}
+.tab:hover .close, .tab.active .close { visibility: visible; }
+.tab .close:hover { background: #E81123; color: #fff; }
+
+/* ---------- 编辑器 ---------- */
+#editor-host { flex: 1; min-height: 0; background: #FFF; }
+#editor-host .cm-editor { height: 100%; }
+#editor-host .cm-editor.cm-focused { outline: none; }
+
+/* ---------- 状态栏 ---------- */
+#statusbar {
+  display: flex;
+  align-items: center;
+  height: 22px;
+  padding: 2px 4px;
+  background: #F0F0F0;
+  border-top: 1px solid #D6D6D6;
+  gap: 3px;
+  flex: none;
+}
+.sb-panel {
+  border: 1px solid #C2C2C2;
+  background: #F5F5F5;
+  padding: 1px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  color: #333;
+}
+#sb-type { flex: 1; min-width: 0; }
+.sb-right { margin-left: auto; }
+
+/* 状态栏按钮（打开终端） */
+.sb-btn { cursor: pointer; }
+.sb-btn:hover { background: #DCE9F5; border-color: #A8C8E8; }
+.sb-btn.disabled { pointer-events: none; opacity: 0.45; }
+
+/* ---------- 首选项对话框 ---------- */
+#prefs-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.25); display: flex; align-items: center; justify-content: center; z-index: 50; }
+#prefs-overlay[hidden] { display: none; }
+#prefs-dialog {
+  background: #F0F0F0;
+  border: 1px solid #8f8f8f;
+  box-shadow: 0 3px 12px rgba(0,0,0,.3);
+  width: 400px;
+  font-size: 12px;
+  color: #000;
+}
+.prefs-title {
+  padding: 7px 12px;
+  font-weight: bold;
+  background: #E4E4E4;
+  border-bottom: 1px solid #C8C8C8;
+}
+#prefs-dialog fieldset {
+  margin: 12px;
+  border: 1px solid #C0C0C0;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+#prefs-dialog legend { color: #003399; padding: 0 4px; }
+#prefs-dialog label { display: flex; align-items: center; gap: 6px; }
+#prefs-dialog input[type="number"] { width: 52px; }
+.pref-row { display: flex; align-items: center; gap: 8px; }
+.prefs-buttons { display: flex; justify-content: flex-end; gap: 8px; padding: 4px 12px 12px; }
+.prefs-buttons button { padding: 3px 18px; font-size: 12px; cursor: pointer; }
+
+/* ---------- 书签标记（N++ 蓝圈） ---------- */
+.bm-mark { width: 11px; height: 11px; margin: 3px; border-radius: 50%; background: #2A56C6; border: 1px solid #173BA8; }
+
+/* ---------- 底部终端 dock ---------- */
+#term-dock {
+  flex: none;
+  height: 210px;
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  border-top: 2px solid #C8C8C8;
+}
+#term-dock[hidden] { display: none; }
+#term-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 10px;
+  background: #F0F0F0;
+  border-bottom: 1px solid #D6D6D6;
+  font-weight: bold;
+  color: #444;
+  flex: none;
+}
+#term-close { cursor: pointer; padding: 0 6px; color: #888; }
+#term-close:hover { color: #C0392B; }
+#term-scroll { flex: 1; overflow-y: auto; padding: 4px 8px; font-family: Consolas, "Courier New", monospace; font-size: 12px; line-height: 1.45; }
+#term-out { white-space: pre-wrap; word-break: break-all; color: #1a1a1a; }
+#term-line { display: flex; align-items: center; gap: 6px; }
+#term-prompt { white-space: pre; color: #1F6F42; font-weight: bold; }
+#term-input { flex: 1; border: none; outline: none; font-family: inherit; font-size: inherit; background: transparent; color: #000; }
+
+/* ---------- 查找窗口（N++ 浮动对话框风格） ---------- */
+#findwin {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 460px;
+  background: #F0F0F0;
+  border: 1px solid #8f8f8f;
+  box-shadow: 0 4px 16px rgba(0,0,0,.35);
+  z-index: 60;
+  font-size: 12px;
+}
+#findwin[hidden] { display: none; }
+#findwin-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+  background: #E4E4E4;
+  border-bottom: 1px solid #C8C8C8;
+  font-weight: bold;
+  cursor: move;
+  user-select: none;
+}
+.fw-close { cursor: pointer; padding: 0 5px; color: #888; }
+.fw-close:hover { color: #C0392B; }
+.fw-tabs { display: flex; border-bottom: 1px solid #C8C8C8; background: #F7F7F7; }
+.fw-tab { padding: 5px 18px; cursor: pointer; color: #666; border-right: 1px solid #DDD; }
+.fw-tab.active { background: #F0F0F0; color: #000; font-weight: bold; border-top: 2px solid #2A56C6; }
+.fw-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 9px; }
+.fw-row { display: flex; align-items: center; gap: 8px; }
+.fw-row > label:first-child { width: 60px; text-align: right; flex: none; }
+.fw-row input[type="text"] { flex: 1; border: 1px solid #A8A8A8; padding: 3px 6px; font-size: 12px; }
+.fw-opt { display: flex; align-items: center; gap: 4px; }
+.fw-btns { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; }
+.fw-col { display: flex; flex-direction: column; gap: 6px; }
+.fw-col button { padding: 3px 14px; font-size: 12px; cursor: pointer; min-width: 96px; }
